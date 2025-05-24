@@ -2,22 +2,53 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>取扱説明書（PDF表示）</title>
+  <title>乾太くん 取扱説明書</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
+    html, body {
       margin: 0;
-      height: 100vh;
-      overflow: hidden;
-    }
-    iframe {
-      width: 100%;
       height: 100%;
-      border: none;
+      background: #f0f0f0;
+      font-family: sans-serif;
+    }
+    #viewer {
+      width: 100%;
+      height: 100vh;
     }
   </style>
 </head>
 <body>
-  <!-- ファイルパスはPDFを同じサーバーにアップロードして指定 -->
-  <iframe src="RDT63-0370X03(00).pdf"></iframe>
+  <div id="viewer"></div>
+
+  <!-- PDF.js ライブラリ読み込み -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    const url = 'RDT63-0370X03(00).pdf';
+    const viewer = document.getElementById('viewer');
+
+    const renderPDF = async (url) => {
+      const pdf = await pdfjsLib.getDocument(url).promise;
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+
+        await page.render(renderContext).promise;
+        viewer.appendChild(canvas);
+      }
+    };
+
+    renderPDF(url);
+  </script>
 </body>
 </html>
